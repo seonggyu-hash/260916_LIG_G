@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 todos.db
+
+.vercel
+.env*
+supabase/.temp/
