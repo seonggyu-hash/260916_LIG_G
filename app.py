@@ -15,7 +15,12 @@ if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
         pass
 
 app = Flask(__name__)
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'todos.db')
+
+# Vercel 서버리스 환경에서는 프로젝트 폴더가 읽기 전용이므로 /tmp 사용
+if os.environ.get('VERCEL'):
+    DB_PATH = os.path.join('/tmp', 'todos.db')
+else:
+    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'todos.db')
 
 
 def get_db():
@@ -332,8 +337,9 @@ def export_csv():
     )
 
 
+init_db()
+
 if __name__ == '__main__':
-    init_db()
     print("=" * 60)
     print("  🚀 LIG DNA SMART TODO WEB APP SERVER STARTED")
     print("  🔗 접속 주소: http://127.0.0.1:5000")
