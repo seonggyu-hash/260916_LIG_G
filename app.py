@@ -1,8 +1,9 @@
 import os
 import sys
-import sqlite3
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, g, send_file
+import psycopg2
+import psycopg2.extras
 import io
 import csv
 
@@ -16,18 +17,13 @@ if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
 
 app = Flask(__name__)
 
-# Vercel 서버리스 환경에서는 프로젝트 폴더가 읽기 전용이므로 /tmp 사용
-if os.environ.get('VERCEL'):
-    DB_PATH = os.path.join('/tmp', 'todos.db')
-else:
-    DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'todos.db')
+DATABASE_URL = os.environ['DATABASE_URL']
 
 
 def get_db():
-    """요청 단위 SQLite DB 커넥션 관리"""
+    """요청 단위 PostgreSQL(Supabase) DB 커넥션 관리"""
     if 'db' not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
+        g.db = psycopg2.connect(DATABASE_URL, cursor_factory=psycopg2.extras.RealDictCursor)
     return g.db
 
 
@@ -41,11 +37,11 @@ def close_db(error):
 
 def init_db():
     """데이터베이스 및 테이블 초기화 및 초기 샘플 데이터 시딩"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS todos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id SERIAL PRIMARY KEY,
             title TEXT NOT NULL,
             category TEXT DEFAULT '업무',
             dna_tag TEXT DEFAULT '혁신',
@@ -53,8 +49,8 @@ def init_db():
             due_date TEXT,
             memo TEXT,
             completed INTEGER DEFAULT 0,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
         )
     ''')
 
@@ -102,7 +98,7 @@ def init_db():
         ]
         cursor.executemany('''
             INSERT INTO todos (title, category, dna_tag, priority, due_date, memo, completed, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', 'localtime'), datetime('now', 'localtime'))
+            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW())
         ''', sample_todos)
         conn.commit()
 
@@ -135,19 +131,19 @@ def get_todos():
         query += ' AND completed = 1'
 
     if priority != 'all':
-        query += ' AND priority = ?'
+        query += ' AND priority = %s'
         params.append(priority)
 
     if dna_tag != 'all':
-        query += ' AND dna_tag = ?'
+        query += ' AND dna_tag = %s'
         params.append(dna_tag)
 
     if category != 'all':
-        query += ' AND category = ?'
+        query += ' AND category = %s'
         params.append(category)
 
     if search:
-        query += ' AND (title LIKE ? OR memo LIKE ?)'
+        query += ' AND (title ILIKE %s OR memo ILIKE %s)'
         wildcard = f'%{search}%'
         params.extend([wildcard, wildcard])
 
@@ -183,12 +179,13 @@ def create_todo():
     cursor = db.cursor()
     cursor.execute('''
         INSERT INTO todos (title, category, dna_tag, priority, due_date, memo, completed, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, 0, datetime('now', 'localtime'), datetime('now', 'localtime'))
+        VALUES (%s, %s, %s, %s, %s, %s, 0, NOW(), NOW())
+        RETURNING id
     ''', (title, category, dna_tag, priority, due_date, memo))
+    todo_id = cursor.fetchone()['id']
     db.commit()
 
-    todo_id = cursor.lastrowid
-    cursor.execute('SELECT * FROM todos WHERE id = ?', (todo_id,))
+    cursor.execute('SELECT * FROM todos WHERE id = %s', (todo_id,))
     new_todo = dict(cursor.fetchone())
     return jsonify(new_todo), 201
 
@@ -211,15 +208,15 @@ def update_todo(todo_id):
     cursor = db.cursor()
     cursor.execute('''
         UPDATE todos
-        SET title = ?, category = ?, dna_tag = ?, priority = ?, due_date = ?, memo = ?, completed = ?, updated_at = datetime('now', 'localtime')
-        WHERE id = ?
+        SET title = %s, category = %s, dna_tag = %s, priority = %s, due_date = %s, memo = %s, completed = %s, updated_at = NOW()
+        WHERE id = %s
     ''', (title, category, dna_tag, priority, due_date, memo, completed, todo_id))
     db.commit()
 
     if cursor.rowcount == 0:
         return jsonify({'error': '해당 항목을 찾을 수 없습니다.'}), 404
 
-    cursor.execute('SELECT * FROM todos WHERE id = ?', (todo_id,))
+    cursor.execute('SELECT * FROM todos WHERE id = %s', (todo_id,))
     updated_todo = dict(cursor.fetchone())
     return jsonify(updated_todo)
 
@@ -228,7 +225,7 @@ def update_todo(todo_id):
 def toggle_todo(todo_id):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('SELECT completed FROM todos WHERE id = ?', (todo_id,))
+    cursor.execute('SELECT completed FROM todos WHERE id = %s', (todo_id,))
     row = cursor.fetchone()
     if not row:
         return jsonify({'error': '해당 항목을 찾을 수 없습니다.'}), 404
@@ -236,12 +233,12 @@ def toggle_todo(todo_id):
     new_status = 0 if row['completed'] == 1 else 1
     cursor.execute('''
         UPDATE todos
-        SET completed = ?, updated_at = datetime('now', 'localtime')
-        WHERE id = ?
+        SET completed = %s, updated_at = NOW()
+        WHERE id = %s
     ''', (new_status, todo_id))
     db.commit()
 
-    cursor.execute('SELECT * FROM todos WHERE id = ?', (todo_id,))
+    cursor.execute('SELECT * FROM todos WHERE id = %s', (todo_id,))
     updated_todo = dict(cursor.fetchone())
     return jsonify(updated_todo)
 
@@ -250,7 +247,7 @@ def toggle_todo(todo_id):
 def delete_todo(todo_id):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('DELETE FROM todos WHERE id = ?', (todo_id,))
+    cursor.execute('DELETE FROM todos WHERE id = %s', (todo_id,))
     db.commit()
     if cursor.rowcount == 0:
         return jsonify({'error': '해당 항목을 찾을 수 없습니다.'}), 404
@@ -273,16 +270,16 @@ def get_stats():
     cursor = db.cursor()
 
     cursor.execute('SELECT COUNT(*) FROM todos')
-    total = cursor.fetchone()[0]
+    total = cursor.fetchone()['count']
 
     cursor.execute('SELECT COUNT(*) FROM todos WHERE completed = 1')
-    completed = cursor.fetchone()[0]
+    completed = cursor.fetchone()['count']
 
     pending = total - completed
     rate = round((completed / total * 100) if total > 0 else 0, 1)
 
     cursor.execute("SELECT COUNT(*) FROM todos WHERE completed = 0 AND priority = 'critical'")
-    critical_count = cursor.fetchone()[0]
+    critical_count = cursor.fetchone()['count']
 
     # DNA 태그별 분포
     cursor.execute('SELECT dna_tag, COUNT(*) as count FROM todos GROUP BY dna_tag')
@@ -324,7 +321,7 @@ def export_csv():
 
     mem = io.BytesIO()
     # Excel 호환을 위해 UTF-8 BOM 인코딩 적용
-    mem.write('\ufeff'.encode('utf-8'))
+    mem.write('﻿'.encode('utf-8'))
     mem.write(output.getvalue().encode('utf-8'))
     mem.seek(0)
 
