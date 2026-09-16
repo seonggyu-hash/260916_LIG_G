@@ -1,16 +1,16 @@
 /**
- * LIG DNA SMART TASK MANAGER - FRONTEND CONTROLLER
+ * LIG DNA SMART KPI MANAGER - FRONTEND CONTROLLER
  * Full Reactive UI, Web Audio API Sound Effects, Real-time Filtering & Modal Management
  */
 
 // State Management
 const state = {
-  todos: [],
+  kpis: [],
   filters: {
     status: 'all',
-    priority: 'all',
-    dna_tag: 'all',
-    category: 'all',
+    kpi_status: 'all',
+    kpi_type: 'all',
+    department: 'all',
     q: '',
     sort: 'created_desc'
   },
@@ -18,9 +18,9 @@ const state = {
     total: 0,
     completed: 0,
     pending: 0,
-    completion_rate: 0,
-    critical_count: 0,
-    dna_distribution: {}
+    avg_achievement_rate: 0,
+    at_risk_count: 0,
+    type_distribution: {}
   },
   isLoading: false,
   theme: localStorage.getItem('lig_theme') || 'dark'
@@ -118,7 +118,7 @@ const DOM = {
   liveTime: document.getElementById('liveTime'),
   liveDate: document.getElementById('liveDate'),
 
-  // KPI
+  // KPI Dashboard
   kpiTotalCount: document.getElementById('kpiTotalCount'),
   kpiCompletedCount: document.getElementById('kpiCompletedCount'),
   kpiPendingCount: document.getElementById('kpiPendingCount'),
@@ -228,7 +228,7 @@ function setDefaultDueDate() {
 async function loadData() {
   showLoading(true);
   try {
-    await Promise.all([fetchTodos(), fetchStats()]);
+    await Promise.all([fetchKpis(), fetchStats()]);
   } catch (err) {
     console.error('Data load error:', err);
     showToast('데이터를 불러오는 중 문제가 발생했습니다.', 'error');
@@ -237,20 +237,20 @@ async function loadData() {
   }
 }
 
-async function fetchTodos() {
+async function fetchKpis() {
   const params = new URLSearchParams({
     status: state.filters.status,
-    priority: state.filters.priority,
-    dna_tag: state.filters.dna_tag,
-    category: state.filters.category,
+    kpi_status: state.filters.kpi_status,
+    kpi_type: state.filters.kpi_type,
+    department: state.filters.department,
     q: state.filters.q,
     sort: state.filters.sort
   });
 
-  const res = await fetch(`/api/todos?${params.toString()}`);
-  if (!res.ok) throw new Error('Failed to fetch todos');
-  const todos = await res.json();
-  state.todos = todos;
+  const res = await fetch(`/api/kpis?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch kpis');
+  const kpis = await res.json();
+  state.kpis = kpis;
   renderTasks();
 }
 
@@ -262,8 +262,8 @@ async function fetchStats() {
   renderStats();
 }
 
-async function createTodo(payload) {
-  const res = await fetch('/api/todos', {
+async function createKpi(payload) {
+  const res = await fetch('/api/kpis', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -271,14 +271,14 @@ async function createTodo(payload) {
 
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.error || '할 일 등록에 실패했습니다.');
+    throw new Error(errorData.error || 'KPI 등록에 실패했습니다.');
   }
 
   return await res.json();
 }
 
-async function updateTodo(id, payload) {
-  const res = await fetch(`/api/todos/${id}`, {
+async function updateKpi(id, payload) {
+  const res = await fetch(`/api/kpis/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -286,14 +286,14 @@ async function updateTodo(id, payload) {
 
   if (!res.ok) {
     const errorData = await res.json();
-    throw new Error(errorData.error || '할 일 수정에 실패했습니다.');
+    throw new Error(errorData.error || 'KPI 수정에 실패했습니다.');
   }
 
   return await res.json();
 }
 
-async function toggleTodoStatus(id) {
-  const res = await fetch(`/api/todos/${id}/toggle`, {
+async function toggleKpiStatus(id) {
+  const res = await fetch(`/api/kpis/${id}/toggle`, {
     method: 'PATCH'
   });
 
@@ -301,8 +301,8 @@ async function toggleTodoStatus(id) {
   return await res.json();
 }
 
-async function deleteTodoItem(id) {
-  const res = await fetch(`/api/todos/${id}`, {
+async function deleteKpiItem(id) {
+  const res = await fetch(`/api/kpis/${id}`, {
     method: 'DELETE'
   });
 
@@ -310,8 +310,8 @@ async function deleteTodoItem(id) {
   return await res.json();
 }
 
-async function clearCompletedTodos() {
-  const res = await fetch('/api/todos/clear-completed', {
+async function clearCompletedKpis() {
+  const res = await fetch('/api/kpis/clear-completed', {
     method: 'POST'
   });
 
@@ -323,26 +323,47 @@ async function clearCompletedTodos() {
    Render UI Functions
    ========================================================================== */
 function renderStats() {
-  const { total, completed, pending, completion_rate, critical_count, dna_distribution } = state.stats;
+  const { total, completed, pending, avg_achievement_rate, at_risk_count, type_distribution } = state.stats;
 
   DOM.kpiTotalCount.textContent = total;
   DOM.kpiCompletedCount.textContent = completed;
   DOM.kpiPendingCount.textContent = pending;
-  DOM.kpiRateBadge.textContent = `${completion_rate}%`;
-  DOM.kpiProgressBar.style.width = `${completion_rate}%`;
-  DOM.kpiCriticalCount.textContent = critical_count;
+  DOM.kpiRateBadge.textContent = `${avg_achievement_rate}%`;
+  DOM.kpiProgressBar.style.width = `${Math.min(avg_achievement_rate, 100)}%`;
+  DOM.kpiCriticalCount.textContent = at_risk_count;
 
-  // DNA Value counts
-  DOM.countChallenge.textContent = dna_distribution['도전'] || 0;
-  DOM.countTrust.textContent = dna_distribution['신뢰'] || 0;
-  DOM.countTech.textContent = dna_distribution['첨단'] || 0;
-  DOM.countInnovation.textContent = dna_distribution['혁신'] || 0;
+  // KPI 유형(BSC 4대 관점)별 분포
+  DOM.countChallenge.textContent = type_distribution['재무'] || 0;
+  DOM.countTrust.textContent = type_distribution['고객'] || 0;
+  DOM.countTech.textContent = type_distribution['프로세스'] || 0;
+  DOM.countInnovation.textContent = type_distribution['성장'] || 0;
+}
+
+// 상태값을 기존 우선순위 배지 색상 체계(critical/high/medium/low)에 매핑
+function getStatusClass(status) {
+  switch (status) {
+    case '지연': return 'critical';
+    case '보류': return 'high';
+    case '완료': return 'low';
+    case '진행중':
+    default: return 'medium';
+  }
+}
+
+function getStatusLabel(status) {
+  const labels = {
+    '지연': '🚨 지연',
+    '보류': '⏸️ 보류',
+    '진행중': '⚡ 진행중',
+    '완료': '✅ 완료'
+  };
+  return labels[status] || status;
 }
 
 function renderTasks() {
-  DOM.activeListCount.textContent = `(${state.todos.length})`;
+  DOM.activeListCount.textContent = `(${state.kpis.length})`;
 
-  if (state.todos.length === 0) {
+  if (state.kpis.length === 0) {
     DOM.taskItemsList.innerHTML = '';
     DOM.emptyState.style.display = 'flex';
     return;
@@ -352,39 +373,40 @@ function renderTasks() {
 
   const todayStr = new Date().toISOString().split('T')[0];
 
-  const html = state.todos.map(todo => {
-    const isDone = todo.completed === 1;
+  const html = state.kpis.map(kpi => {
+    const isDone = kpi.status === '완료';
 
-    // Due Date calculation
+    // 종료일 계산
     let dueDateHtml = '';
-    if (todo.due_date) {
+    if (kpi.end_date) {
       let dateClass = '';
-      let datePrefix = '📅 ';
-      if (todo.due_date < todayStr && !isDone) {
+      let datePrefix = '📅 종료: ';
+      if (kpi.end_date < todayStr && !isDone) {
         dateClass = 'overdue';
         datePrefix = '⚠️ 기한 초과: ';
-      } else if (todo.due_date === todayStr && !isDone) {
+      } else if (kpi.end_date === todayStr && !isDone) {
         dateClass = 'today';
         datePrefix = '🔥 오늘 마감: ';
       }
-      dueDateHtml = `<span class="due-date-pill ${dateClass}">${datePrefix}${escapeHtml(todo.due_date)}</span>`;
+      dueDateHtml = `<span class="due-date-pill ${dateClass}">${datePrefix}${escapeHtml(kpi.end_date)}</span>`;
     }
 
-    // Priority Labels
-    const priorityLabels = {
-      critical: '🚨 긴급',
-      high: '🔥 높음',
-      medium: '⚡ 보통',
-      low: '🌱 낮음'
-    };
+    const periodHtml = kpi.start_date
+      ? `<span class="due-date-pill">📆 ${escapeHtml(kpi.start_date)} ~ ${kpi.end_date ? escapeHtml(kpi.end_date) : '진행중'}</span>`
+      : '';
 
-    // Memo snippet
-    const memoHtml = todo.memo ? `<div class="task-memo-preview">${escapeHtml(todo.memo)}</div>` : '';
+    const ownerHtml = kpi.owner ? `<span class="created-at">👤 ${escapeHtml(kpi.owner)}</span>` : '';
+
+    // 설명/메모 미리보기
+    const descHtml = kpi.description ? `<div class="task-memo-preview">${escapeHtml(kpi.description)}</div>` : '';
+
+    const rate = Math.max(0, kpi.achievement_rate || 0);
+    const rateDisplay = `${kpi.current_value ?? 0}${kpi.unit ? ' ' + escapeHtml(kpi.unit) : ''} / ${kpi.target_value ?? 0}${kpi.unit ? ' ' + escapeHtml(kpi.unit) : ''} (${rate}%)`;
 
     return `
-      <div class="task-card ${isDone ? 'completed' : ''}" data-id="${todo.id}" data-priority="${todo.priority}">
+      <div class="task-card ${isDone ? 'completed' : ''}" data-id="${kpi.id}" data-priority="${getStatusClass(kpi.status)}">
         <div class="task-checkbox-wrap">
-          <button type="button" class="task-custom-checkbox" onclick="handleToggleTask(${todo.id})" title="${isDone ? '완료 취소' : '업무 완료 처리'}">
+          <button type="button" class="task-custom-checkbox" onclick="handleToggleTask(${kpi.id})" title="${isDone ? '완료 취소' : 'KPI 완료 처리'}">
             <svg viewBox="0 0 24 24">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
@@ -393,25 +415,34 @@ function renderTasks() {
 
         <div class="task-body">
           <div class="task-meta-top">
-            <span class="badge badge-dna" data-tag="${escapeHtml(todo.dna_tag)}">${getDnaIcon(todo.dna_tag)} ${escapeHtml(todo.dna_tag)}</span>
-            <span class="badge badge-category">${escapeHtml(todo.category)}</span>
-            <span class="badge badge-priority ${todo.priority}">${priorityLabels[todo.priority] || todo.priority}</span>
+            <span class="badge badge-dna" data-tag="${escapeHtml(kpi.kpi_type)}">${getKpiTypeIcon(kpi.kpi_type)} ${escapeHtml(kpi.kpi_type)}</span>
+            <span class="badge badge-category">${escapeHtml(kpi.department)}</span>
+            <span class="badge badge-priority ${getStatusClass(kpi.status)}">${getStatusLabel(kpi.status)}</span>
           </div>
 
-          <div class="task-title-text">${escapeHtml(todo.title)}</div>
-          ${memoHtml}
+          <div class="task-title-text">${escapeHtml(kpi.name)}</div>
+          ${descHtml}
+
+          <div class="kpi-progress-wrapper" title="${rateDisplay}">
+            <div class="kpi-progress-bar" style="width: ${Math.min(rate, 100)}%;"></div>
+          </div>
+          <div class="task-meta-bottom">
+            <span class="due-date-pill">📊 ${rateDisplay}</span>
+          </div>
 
           <div class="task-meta-bottom">
+            ${periodHtml}
             ${dueDateHtml}
-            <span class="created-at">등록: ${formatDate(todo.created_at)}</span>
+            ${ownerHtml}
+            <span class="created-at">등록: ${formatDate(kpi.created_at)}</span>
           </div>
         </div>
 
         <div class="task-actions">
-          <button type="button" class="action-icon-btn edit-btn" onclick="openEditModal(${todo.id})" title="수정">
+          <button type="button" class="action-icon-btn edit-btn" onclick="openEditModal(${kpi.id})" title="수정">
             ✏️
           </button>
-          <button type="button" class="action-icon-btn delete-btn" onclick="handleDeleteTask(${todo.id})" title="삭제">
+          <button type="button" class="action-icon-btn delete-btn" onclick="handleDeleteTask(${kpi.id})" title="삭제">
             🗑️
           </button>
         </div>
@@ -422,12 +453,12 @@ function renderTasks() {
   DOM.taskItemsList.innerHTML = html;
 }
 
-function getDnaIcon(tag) {
-  switch (tag) {
-    case '도전': return '🔥';
-    case '신뢰': return '🤝';
-    case '첨단': return '⚡';
-    case '혁신': return '💡';
+function getKpiTypeIcon(type) {
+  switch (type) {
+    case '재무': return '💰';
+    case '고객': return '🤝';
+    case '프로세스': return '⚙️';
+    case '성장': return '🌱';
     default: return '🧬';
   }
 }
@@ -455,49 +486,49 @@ function setupEventListeners() {
       DOM.statusTabs.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       state.filters.status = e.target.getAttribute('data-status');
-      fetchTodos();
+      fetchKpis();
     });
   });
 
-  // Priority Filter
+  // Status(지연/보류/진행중/완료) Filter
   DOM.filterPriority.addEventListener('change', (e) => {
-    state.filters.priority = e.target.value;
-    fetchTodos();
+    state.filters.kpi_status = e.target.value;
+    fetchKpis();
   });
 
-  // DNA Tag Filter
+  // KPI 유형 Filter
   DOM.filterDna.addEventListener('change', (e) => {
-    state.filters.dna_tag = e.target.value;
-    fetchTodos();
+    state.filters.kpi_type = e.target.value;
+    fetchKpis();
   });
 
-  // DNA Pills quick filter in KPI card
+  // KPI 유형 Pills quick filter in dashboard card
   document.querySelectorAll('.dna-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       const tag = pill.getAttribute('data-tag');
-      if (state.filters.dna_tag === tag) {
-        state.filters.dna_tag = 'all';
+      if (state.filters.kpi_type === tag) {
+        state.filters.kpi_type = 'all';
         DOM.filterDna.value = 'all';
-        showToast('DNA 필터가 해제되었습니다.', 'info');
+        showToast('KPI 유형 필터가 해제되었습니다.', 'info');
       } else {
-        state.filters.dna_tag = tag;
+        state.filters.kpi_type = tag;
         DOM.filterDna.value = tag;
-        showToast(`'${tag}' 가치 업무만 모아봅니다.`, 'info');
+        showToast(`'${tag}' 관점 KPI만 모아봅니다.`, 'info');
       }
-      fetchTodos();
+      fetchKpis();
     });
   });
 
-  // Category Filter
+  // 부서 Filter
   DOM.filterCategory.addEventListener('change', (e) => {
-    state.filters.category = e.target.value;
-    fetchTodos();
+    state.filters.department = e.target.value;
+    fetchKpis();
   });
 
   // Sort By
   DOM.sortBy.addEventListener('change', (e) => {
     state.filters.sort = e.target.value;
-    fetchTodos();
+    fetchKpis();
   });
 
   // Search input with debounce
@@ -509,7 +540,7 @@ function setupEventListeners() {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
       state.filters.q = val;
-      fetchTodos();
+      fetchKpis();
     }, 280);
   });
 
@@ -517,7 +548,7 @@ function setupEventListeners() {
     DOM.taskSearchInput.value = '';
     DOM.searchClearBtn.style.display = 'none';
     state.filters.q = '';
-    fetchTodos();
+    fetchKpis();
     DOM.taskSearchInput.focus();
   });
 
@@ -527,7 +558,7 @@ function setupEventListeners() {
   // CSV Export
   DOM.exportCsvBtn.addEventListener('click', () => {
     window.location.href = '/api/export/csv';
-    showToast('CSV 업무 파일 다운로드를 시작합니다.', 'info');
+    showToast('CSV KPI 파일 다운로드를 시작합니다.', 'info');
   });
 
   // Modal open/close
@@ -571,18 +602,18 @@ function isInputFocused() {
 }
 
 /* ==========================================================================
-   Task Operations
+   KPI Operations
    ========================================================================== */
 window.handleToggleTask = async function(id) {
   soundFX.playSuccessChime();
   try {
-    const updated = await toggleTodoStatus(id);
-    await Promise.all([fetchTodos(), fetchStats()]);
+    const updated = await toggleKpiStatus(id);
+    await Promise.all([fetchKpis(), fetchStats()]);
 
-    if (updated.completed === 1) {
-      showToast('🎉 업무를 완료했습니다! 수고하셨습니다.', 'success');
+    if (updated.status === '완료') {
+      showToast('🎉 KPI를 완료 처리했습니다! 수고하셨습니다.', 'success');
     } else {
-      showToast('업무를 진행중 상태로 변경했습니다.', 'info');
+      showToast('KPI를 진행중 상태로 변경했습니다.', 'info');
     }
   } catch (err) {
     showToast('상태 변경 중 오류가 발생했습니다.', 'error');
@@ -590,12 +621,12 @@ window.handleToggleTask = async function(id) {
 };
 
 window.handleDeleteTask = async function(id) {
-  if (!confirm('이 업무를 정말 삭제하시겠습니까?')) return;
+  if (!confirm('이 KPI를 정말 삭제하시겠습니까?')) return;
   soundFX.playPopSound();
   try {
-    await deleteTodoItem(id);
-    await Promise.all([fetchTodos(), fetchStats()]);
-    showToast('업무가 성공적으로 삭제되었습니다.', 'info');
+    await deleteKpiItem(id);
+    await Promise.all([fetchKpis(), fetchStats()]);
+    showToast('KPI가 성공적으로 삭제되었습니다.', 'info');
   } catch (err) {
     showToast('삭제 중 오류가 발생했습니다.', 'error');
   }
@@ -604,16 +635,16 @@ window.handleDeleteTask = async function(id) {
 async function handleClearCompleted() {
   const completedCount = state.stats.completed;
   if (completedCount === 0) {
-    showToast('정리할 완료된 업무가 없습니다.', 'info');
+    showToast('정리할 완료된 KPI가 없습니다.', 'info');
     return;
   }
 
-  if (!confirm(`완료된 업무 ${completedCount}개를 모두 정리(삭제)하시겠습니까?`)) return;
+  if (!confirm(`완료된 KPI ${completedCount}개를 모두 정리(삭제)하시겠습니까?`)) return;
 
   try {
-    const res = await clearCompletedTodos();
-    await Promise.all([fetchTodos(), fetchStats()]);
-    showToast(`완료된 ${res.deleted_count}개 업무를 정리했습니다.`, 'success');
+    const res = await clearCompletedKpis();
+    await Promise.all([fetchKpis(), fetchStats()]);
+    showToast(`완료된 ${res.deleted_count}개 KPI를 정리했습니다.`, 'success');
   } catch (err) {
     showToast('완료 항목 정리 중 오류가 발생했습니다.', 'error');
   }
@@ -639,37 +670,48 @@ async function handleCreateFormSubmit(e) {
   const formData = new FormData(DOM.createTaskForm);
 
   const payload = {
-    title: formData.get('title'),
-    category: formData.get('category'),
-    dna_tag: formData.get('dna_tag'),
-    priority: formData.get('priority'),
-    due_date: formData.get('due_date'),
+    name: formData.get('name'),
+    description: formData.get('description'),
+    owner: formData.get('owner'),
+    department: formData.get('department'),
+    kpi_type: formData.get('kpi_type'),
+    unit: formData.get('unit'),
+    target_value: formData.get('target_value') || 0,
+    current_value: formData.get('current_value') || 0,
+    start_date: formData.get('start_date'),
+    end_date: formData.get('end_date'),
+    status: formData.get('status'),
     memo: formData.get('memo')
   };
 
   try {
-    await createTodo(payload);
+    await createKpi(payload);
     closeCreateModal();
     soundFX.playSuccessChime();
-    showToast('새로운 업무가 성공적으로 등록되었습니다!', 'success');
-    await Promise.all([fetchTodos(), fetchStats()]);
+    showToast('새로운 KPI가 성공적으로 등록되었습니다!', 'success');
+    await Promise.all([fetchKpis(), fetchStats()]);
   } catch (err) {
-    showToast(err.message || '업무 등록에 실패했습니다.', 'error');
+    showToast(err.message || 'KPI 등록에 실패했습니다.', 'error');
   }
 }
 
 window.openEditModal = function(id) {
-  const todo = state.todos.find(t => t.id === id);
-  if (!todo) return;
+  const kpi = state.kpis.find(k => k.id === id);
+  if (!kpi) return;
 
-  document.getElementById('editTaskId').value = todo.id;
-  document.getElementById('editTitle').value = todo.title;
-  document.getElementById('editCategory').value = todo.category || '업무';
-  document.getElementById('editDna').value = todo.dna_tag || '혁신';
-  document.getElementById('editPriority').value = todo.priority || 'medium';
-  document.getElementById('editDueDate').value = todo.due_date || '';
-  document.getElementById('editMemo').value = todo.memo || '';
-  document.getElementById('editCompleted').checked = todo.completed === 1;
+  document.getElementById('editTaskId').value = kpi.id;
+  document.getElementById('editTitle').value = kpi.name;
+  document.getElementById('editDescription').value = kpi.description || '';
+  document.getElementById('editOwner').value = kpi.owner || '';
+  document.getElementById('editCategory').value = kpi.department || '영업팀';
+  document.getElementById('editDna').value = kpi.kpi_type || '성장';
+  document.getElementById('editPriority').value = kpi.status || '진행중';
+  document.getElementById('editUnit').value = kpi.unit || '';
+  document.getElementById('editTarget').value = kpi.target_value ?? 0;
+  document.getElementById('editCurrent').value = kpi.current_value ?? 0;
+  document.getElementById('editStartDate').value = kpi.start_date || '';
+  document.getElementById('editDueDate').value = kpi.end_date || '';
+  document.getElementById('editMemo').value = kpi.memo || '';
 
   DOM.editModalBackdrop.style.display = 'flex';
   setTimeout(() => document.getElementById('editTitle').focus(), 50);
@@ -686,23 +728,28 @@ async function handleEditFormSubmit(e) {
   const id = formData.get('id');
 
   const payload = {
-    title: formData.get('title'),
-    category: formData.get('category'),
-    dna_tag: formData.get('dna_tag'),
-    priority: formData.get('priority'),
-    due_date: formData.get('due_date'),
-    memo: formData.get('memo'),
-    completed: document.getElementById('editCompleted').checked
+    name: formData.get('name'),
+    description: formData.get('description'),
+    owner: formData.get('owner'),
+    department: formData.get('department'),
+    kpi_type: formData.get('kpi_type'),
+    unit: formData.get('unit'),
+    target_value: formData.get('target_value') || 0,
+    current_value: formData.get('current_value') || 0,
+    start_date: formData.get('start_date'),
+    end_date: formData.get('end_date'),
+    status: formData.get('status'),
+    memo: formData.get('memo')
   };
 
   try {
-    await updateTodo(id, payload);
+    await updateKpi(id, payload);
     closeEditModal();
     soundFX.playSuccessChime();
-    showToast('업무 내용이 저장되었습니다.', 'success');
-    await Promise.all([fetchTodos(), fetchStats()]);
+    showToast('KPI 내용이 저장되었습니다.', 'success');
+    await Promise.all([fetchKpis(), fetchStats()]);
   } catch (err) {
-    showToast(err.message || '업무 수정에 실패했습니다.', 'error');
+    showToast(err.message || 'KPI 수정에 실패했습니다.', 'error');
   }
 }
 
@@ -728,7 +775,7 @@ function showToast(message, type = 'info') {
 
 // Security: HTML Escaping
 function escapeHtml(str) {
-  if (!str) return '';
+  if (str === null || str === undefined || str === '') return '';
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

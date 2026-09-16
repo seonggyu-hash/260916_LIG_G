@@ -1,5 +1,5 @@
 /* ==========================================================================
-   LIG DNA SMART TODO APP - STYLING SYSTEM
+   LIG DNA SMART KPI MANAGER - STYLING SYSTEM
    Modern, Futuristic, Glassmorphic & High-Performance Design
    ========================================================================== */
 
@@ -851,10 +851,10 @@ body {
   color: #ffffff;
 }
 
-.badge-dna[data-tag="혁신"] { background: var(--dna-innovation); }
-.badge-dna[data-tag="첨단"] { background: var(--dna-tech); }
-.badge-dna[data-tag="도전"] { background: var(--dna-challenge); }
-.badge-dna[data-tag="신뢰"] { background: var(--dna-trust); }
+.badge-dna[data-tag="성장"] { background: var(--dna-innovation); }
+.badge-dna[data-tag="프로세스"] { background: var(--dna-tech); }
+.badge-dna[data-tag="재무"] { background: var(--dna-challenge); }
+.badge-dna[data-tag="고객"] { background: var(--dna-trust); }
 
 .badge-category {
   background: var(--bg-tertiary);

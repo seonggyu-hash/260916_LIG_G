@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LIG DNA Smart Task Manager | 차세대 스마트 할일 관리 시스템</title>
-  <meta name="description" content="LIG DNA 핵심가치(도전, 신뢰, 첨단, 혁신)를 담은 프리미엄 스마트 할일 관리 웹 애플리케이션">
+  <title>LIG DNA Smart KPI Manager | 차세대 스마트 KPI 관리 시스템</title>
+  <meta name="description" content="LIG DNA 핵심가치(도전, 신뢰, 첨단, 혁신)를 담은 프리미엄 스마트 KPI(핵심성과지표) 관리 웹 애플리케이션">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -28,8 +28,8 @@
             <span class="dna-dot d4"></span>
           </div>
           <div class="brand-titles">
-            <div class="brand-name">LIG <span class="accent-text">DNA</span> <span class="tag-version">SMART v1.0</span></div>
-            <p class="brand-subtitle">High-Tech Task & Workflow Management System</p>
+            <div class="brand-name">LIG <span class="accent-text">DNA</span> <span class="tag-version">KPI v2.0</span></div>
+            <p class="brand-subtitle">High-Tech KPI & Performance Management System</p>
           </div>
         </div>
       </div>
@@ -48,60 +48,60 @@
           <span>📥</span> 내보내기
         </button>
         <button type="button" class="btn btn-primary" id="openNewModalBtn">
-          <span>+</span> 새 업무 등록
+          <span>+</span> 새 KPI 등록
         </button>
       </div>
     </header>
 
-    <!-- KPI / DNA Statistics Section -->
+    <!-- KPI Dashboard Section -->
     <section class="kpi-dashboard" id="kpiDashboard">
       <div class="kpi-card glass-panel">
         <div class="kpi-header">
-          <span class="kpi-label">전체 태스크</span>
+          <span class="kpi-label">전체 KPI</span>
           <span class="kpi-badge total-badge">Total</span>
         </div>
         <div class="kpi-value" id="kpiTotalCount">0</div>
-        <div class="kpi-foot">등록된 모든 업무 과제</div>
+        <div class="kpi-foot">등록된 모든 KPI 지표</div>
       </div>
 
       <div class="kpi-card glass-panel">
         <div class="kpi-header">
-          <span class="kpi-label">완료율</span>
+          <span class="kpi-label">평균 달성률</span>
           <span class="kpi-badge rate-badge" id="kpiRateBadge">0%</span>
         </div>
         <div class="kpi-progress-wrapper">
           <div class="kpi-progress-bar" id="kpiProgressBar" style="width: 0%;"></div>
         </div>
         <div class="kpi-foot">
-          <span id="kpiCompletedCount">0</span>개 완료 / <span id="kpiPendingCount">0</span>개 남음
+          <span id="kpiCompletedCount">0</span>개 완료 / <span id="kpiPendingCount">0</span>개 진행중
         </div>
       </div>
 
       <div class="kpi-card glass-panel">
         <div class="kpi-header">
-          <span class="kpi-label">긴급 과제 현황</span>
-          <span class="kpi-badge urgent-badge">CRITICAL</span>
+          <span class="kpi-label">위험 KPI 현황</span>
+          <span class="kpi-badge urgent-badge">AT RISK</span>
         </div>
         <div class="kpi-value urgent-value" id="kpiCriticalCount">0</div>
-        <div class="kpi-foot">즉각 대응이 필요한 최우선 업무</div>
+        <div class="kpi-foot">지연 상태로 즉각 대응이 필요한 KPI</div>
       </div>
 
       <div class="kpi-card glass-panel dna-matrix-card">
         <div class="kpi-header">
-          <span class="kpi-label">LIG DNA 핵심가치 활성도</span>
+          <span class="kpi-label">KPI 유형 분포 (BSC 4대 관점)</span>
         </div>
         <div class="dna-pill-matrix">
-          <div class="dna-pill pill-challenge" data-tag="도전" title="도전 정신">
-            <span class="dna-sym">🔥</span> 도전 <span class="count" id="countChallenge">0</span>
+          <div class="dna-pill pill-challenge" data-tag="재무" title="재무 관점">
+            <span class="dna-sym">💰</span> 재무 <span class="count" id="countChallenge">0</span>
           </div>
-          <div class="dna-pill pill-trust" data-tag="신뢰" title="상호 신뢰">
-            <span class="dna-sym">🤝</span> 신뢰 <span class="count" id="countTrust">0</span>
+          <div class="dna-pill pill-trust" data-tag="고객" title="고객 관점">
+            <span class="dna-sym">🤝</span> 고객 <span class="count" id="countTrust">0</span>
           </div>
-          <div class="dna-pill pill-tech" data-tag="첨단" title="첨단 기술">
-            <span class="dna-sym">⚡</span> 첨단 <span class="count" id="countTech">0</span>
+          <div class="dna-pill pill-tech" data-tag="프로세스" title="내부 프로세스 관점">
+            <span class="dna-sym">⚙️</span> 프로세스 <span class="count" id="countTech">0</span>
           </div>
-          <div class="dna-pill pill-innovation" data-tag="혁신" title="창의 혁신">
-            <span class="dna-sym">💡</span> 혁신 <span class="count" id="countInnovation">0</span>
+          <div class="dna-pill pill-innovation" data-tag="성장" title="학습과 성장 관점">
+            <span class="dna-sym">🌱</span> 성장 <span class="count" id="countInnovation">0</span>
           </div>
         </div>
       </div>
@@ -111,7 +111,7 @@
     <section class="action-filter-bar glass-panel">
       <div class="search-input-box">
         <span class="search-icon">🔍</span>
-        <input type="text" id="taskSearchInput" placeholder="업무명, 키워드, 메모 검색... (단축키: /)" autocomplete="off">
+        <input type="text" id="taskSearchInput" placeholder="KPI명, 설명, 메모 검색... (단축키: /)" autocomplete="off">
         <button type="button" class="search-clear-btn" id="searchClearBtn" style="display: none;">✕</button>
       </div>
 
@@ -125,56 +125,56 @@
 
         <!-- Filter Dropdowns -->
         <div class="select-group">
-          <select id="filterPriority" class="custom-select" aria-label="우선순위 필터">
-            <option value="all">우선순위: 전체</option>
-            <option value="critical">🚨 긴급 (Critical)</option>
-            <option value="high">🔥 높음 (High)</option>
-            <option value="medium">⚡ 보통 (Medium)</option>
-            <option value="low">🌱 낮음 (Low)</option>
+          <select id="filterPriority" class="custom-select" aria-label="상태 필터">
+            <option value="all">상태: 전체</option>
+            <option value="지연">🚨 지연 (Delayed)</option>
+            <option value="보류">⏸️ 보류 (On Hold)</option>
+            <option value="진행중">⚡ 진행중 (In Progress)</option>
+            <option value="완료">✅ 완료 (Completed)</option>
           </select>
 
-          <select id="filterDna" class="custom-select" aria-label="DNA 가치 필터">
-            <option value="all">DNA 가치: 전체</option>
-            <option value="혁신">💡 혁신</option>
-            <option value="첨단">⚡ 첨단</option>
-            <option value="도전">🔥 도전</option>
-            <option value="신뢰">🤝 신뢰</option>
+          <select id="filterDna" class="custom-select" aria-label="KPI 유형 필터">
+            <option value="all">KPI 유형: 전체</option>
+            <option value="성장">🌱 성장</option>
+            <option value="프로세스">⚙️ 프로세스</option>
+            <option value="재무">💰 재무</option>
+            <option value="고객">🤝 고객</option>
           </select>
 
-          <select id="filterCategory" class="custom-select" aria-label="카테고리 필터">
-            <option value="all">카테고리: 전체</option>
-            <option value="개발">개발/R&D</option>
-            <option value="기획">기획/전략</option>
-            <option value="협업">협업/소통</option>
-            <option value="연구">연구/분석</option>
-            <option value="업무">일반업무</option>
+          <select id="filterCategory" class="custom-select" aria-label="부서 필터">
+            <option value="all">부서: 전체</option>
+            <option value="영업팀">영업팀</option>
+            <option value="마케팅팀">마케팅팀</option>
+            <option value="개발팀">개발팀</option>
+            <option value="기획팀">기획팀</option>
+            <option value="경영지원팀">경영지원팀</option>
           </select>
 
           <select id="sortBy" class="custom-select" aria-label="정렬 기준">
             <option value="created_desc">정렬: 최신 등록순</option>
-            <option value="due_asc">정렬: 마감 임박순</option>
-            <option value="priority_desc">정렬: 중요도 순</option>
+            <option value="due_asc">정렬: 종료일 임박순</option>
+            <option value="achievement_desc">정렬: 달성률 높은순</option>
             <option value="created_asc">정렬: 오래된 순</option>
           </select>
         </div>
 
         <!-- Extra Batch Actions -->
         <div class="extra-action-buttons">
-          <button type="button" class="btn btn-danger-soft" id="clearCompletedBtn" title="완료된 할 일 일괄 정리">
+          <button type="button" class="btn btn-danger-soft" id="clearCompletedBtn" title="완료된 KPI 일괄 정리">
             🗑️ 완료 항목 정리
           </button>
         </div>
       </div>
     </section>
 
-    <!-- Task List Main Area -->
+    <!-- KPI List Main Area -->
     <main class="tasks-main-container">
       <div class="task-list-header">
         <div class="list-title">
-          <h2>업무 목록 <span class="list-count" id="activeListCount">(0)</span></h2>
+          <h2>KPI 목록 <span class="list-count" id="activeListCount">(0)</span></h2>
         </div>
         <div class="shortcut-hints">
-          <span class="hint-pill"><kbd>N</kbd> 새 업무</span>
+          <span class="hint-pill"><kbd>N</kbd> 새 KPI</span>
           <span class="hint-pill"><kbd>/</kbd> 검색</span>
           <span class="hint-pill"><kbd>ESC</kbd> 닫기</span>
         </div>
@@ -183,20 +183,20 @@
       <!-- Loading Spinner -->
       <div class="loading-state" id="loadingState">
         <div class="spinner"></div>
-        <p>LIG DNA 태스크를 불러오는 중입니다...</p>
+        <p>LIG DNA KPI 데이터를 불러오는 중입니다...</p>
       </div>
 
       <!-- Empty State -->
       <div class="empty-state glass-panel" id="emptyState" style="display: none;">
         <div class="empty-icon">🧬</div>
-        <h3>등록된 업무가 없습니다</h3>
-        <p>새로운 업무를 등록하거나 검색 및 필터 조건을 변경해 보세요.</p>
+        <h3>등록된 KPI가 없습니다</h3>
+        <p>새로운 KPI를 등록하거나 검색 및 필터 조건을 변경해 보세요.</p>
         <button type="button" class="btn btn-primary" onclick="openCreateModal()">
-          <span>+</span> 첫 번째 업무 등록하기
+          <span>+</span> 첫 번째 KPI 등록하기
         </button>
       </div>
 
-      <!-- Task Items Grid/List -->
+      <!-- KPI Items Grid/List -->
       <div class="task-items-list" id="taskItemsList">
         <!-- Dynamically rendered via app.js -->
       </div>
@@ -207,66 +207,103 @@
     </footer>
   </div>
 
-  <!-- Create Task Modal -->
+  <!-- Create KPI Modal -->
   <div class="modal-backdrop" id="createModalBackdrop" style="display: none;">
     <div class="modal-window glass-panel">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-icon">✨</span>
-          <h3>신규 업무 등록</h3>
+          <h3>신규 KPI 등록</h3>
         </div>
         <button type="button" class="modal-close-btn" id="closeCreateModalBtn">✕</button>
       </div>
 
       <form id="createTaskForm" class="modal-form">
         <div class="form-group">
-          <label for="createTitle">업무 제목 <span class="required-star">*</span></label>
-          <input type="text" id="createTitle" name="title" required placeholder="수행할 업무명을 명확하게 입력하세요" autocomplete="off">
+          <label for="createTitle">KPI 이름 <span class="required-star">*</span></label>
+          <input type="text" id="createTitle" name="name" required placeholder="예: 신규 고객 확보" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="createDescription">KPI 설명</label>
+          <input type="text" id="createDescription" name="description" placeholder="예: 월간 신규 고객 유치 목표" autocomplete="off">
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
-            <label for="createCategory">카테고리</label>
-            <select id="createCategory" name="category">
-              <option value="개발">개발/R&D</option>
-              <option value="기획">기획/전략</option>
-              <option value="협업">협업/소통</option>
-              <option value="연구">연구/분석</option>
-              <option value="업무" selected>일반업무</option>
-            </select>
+            <label for="createOwner">담당자</label>
+            <input type="text" id="createOwner" name="owner" placeholder="담당자명" autocomplete="off">
           </div>
 
           <div class="form-group">
-            <label for="createDna">LIG DNA 핵심가치</label>
-            <select id="createDna" name="dna_tag">
-              <option value="혁신" selected>💡 혁신 (Innovation)</option>
-              <option value="첨단">⚡ 첨단 (High-Tech)</option>
-              <option value="도전">🔥 도전 (Challenge)</option>
-              <option value="신뢰">🤝 신뢰 (Trust)</option>
+            <label for="createCategory">부서</label>
+            <select id="createCategory" name="department">
+              <option value="영업팀" selected>영업팀</option>
+              <option value="마케팅팀">마케팅팀</option>
+              <option value="개발팀">개발팀</option>
+              <option value="기획팀">기획팀</option>
+              <option value="경영지원팀">경영지원팀</option>
             </select>
           </div>
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
-            <label for="createPriority">우선순위</label>
-            <select id="createPriority" name="priority">
-              <option value="critical">🚨 긴급 (Critical)</option>
-              <option value="high">🔥 높음 (High)</option>
-              <option value="medium" selected>⚡ 보통 (Medium)</option>
-              <option value="low">🌱 낮음 (Low)</option>
+            <label for="createDna">KPI 유형 (BSC 관점)</label>
+            <select id="createDna" name="kpi_type">
+              <option value="성장" selected>🌱 성장 (Growth)</option>
+              <option value="프로세스">⚙️ 프로세스 (Process)</option>
+              <option value="재무">💰 재무 (Financial)</option>
+              <option value="고객">🤝 고객 (Customer)</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="createDueDate">마감 기한</label>
-            <input type="date" id="createDueDate" name="due_date">
+            <label for="createPriority">상태</label>
+            <select id="createPriority" name="status">
+              <option value="지연">🚨 지연 (Delayed)</option>
+              <option value="보류">⏸️ 보류 (On Hold)</option>
+              <option value="진행중" selected>⚡ 진행중 (In Progress)</option>
+              <option value="완료">✅ 완료 (Completed)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="createUnit">측정 단위</label>
+            <input type="text" id="createUnit" name="unit" placeholder="예: 명, %, 백만원" autocomplete="off">
+          </div>
+          <div class="form-group"></div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="createTarget">목표값</label>
+            <input type="number" id="createTarget" name="target_value" step="any" placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="createCurrent">현재값</label>
+            <input type="number" id="createCurrent" name="current_value" step="any" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="createStartDate">시작일</label>
+            <input type="date" id="createStartDate" name="start_date">
+          </div>
+
+          <div class="form-group">
+            <label for="createDueDate">종료일</label>
+            <input type="date" id="createDueDate" name="end_date">
           </div>
         </div>
 
         <div class="form-group">
           <label for="createMemo">상세 메모 & 세부 실행 방안</label>
-          <textarea id="createMemo" name="memo" rows="3" placeholder="관련 링크, 참고 사항, 세부 요구사항을 자유롭게 작성하세요"></textarea>
+          <textarea id="createMemo" name="memo" rows="3" placeholder="관련 링크, 참고 사항, 세부 실행 방안을 자유롭게 작성하세요"></textarea>
         </div>
 
         <div class="modal-actions">
@@ -277,13 +314,13 @@
     </div>
   </div>
 
-  <!-- Edit Task Modal -->
+  <!-- Edit KPI Modal -->
   <div class="modal-backdrop" id="editModalBackdrop" style="display: none;">
     <div class="modal-window glass-panel">
       <div class="modal-header">
         <div class="modal-title-wrap">
           <span class="modal-icon">✏️</span>
-          <h3>업무 정보 수정</h3>
+          <h3>KPI 정보 수정</h3>
         </div>
         <button type="button" class="modal-close-btn" id="closeEditModalBtn">✕</button>
       </div>
@@ -292,61 +329,90 @@
         <input type="hidden" id="editTaskId" name="id">
 
         <div class="form-group">
-          <label for="editTitle">업무 제목 <span class="required-star">*</span></label>
-          <input type="text" id="editTitle" name="title" required placeholder="업무명을 입력하세요" autocomplete="off">
+          <label for="editTitle">KPI 이름 <span class="required-star">*</span></label>
+          <input type="text" id="editTitle" name="name" required placeholder="KPI 이름을 입력하세요" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="editDescription">KPI 설명</label>
+          <input type="text" id="editDescription" name="description" placeholder="KPI 설명을 입력하세요" autocomplete="off">
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
-            <label for="editCategory">카테고리</label>
-            <select id="editCategory" name="category">
-              <option value="개발">개발/R&D</option>
-              <option value="기획">기획/전략</option>
-              <option value="협업">협업/소통</option>
-              <option value="연구">연구/분석</option>
-              <option value="업무">일반업무</option>
-            </select>
+            <label for="editOwner">담당자</label>
+            <input type="text" id="editOwner" name="owner" placeholder="담당자명" autocomplete="off">
           </div>
 
           <div class="form-group">
-            <label for="editDna">LIG DNA 핵심가치</label>
-            <select id="editDna" name="dna_tag">
-              <option value="혁신">💡 혁신 (Innovation)</option>
-              <option value="첨단">⚡ 첨단 (High-Tech)</option>
-              <option value="도전">🔥 도전 (Challenge)</option>
-              <option value="신뢰">🤝 신뢰 (Trust)</option>
+            <label for="editCategory">부서</label>
+            <select id="editCategory" name="department">
+              <option value="영업팀">영업팀</option>
+              <option value="마케팅팀">마케팅팀</option>
+              <option value="개발팀">개발팀</option>
+              <option value="기획팀">기획팀</option>
+              <option value="경영지원팀">경영지원팀</option>
             </select>
           </div>
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
-            <label for="editPriority">우선순위</label>
-            <select id="editPriority" name="priority">
-              <option value="critical">🚨 긴급 (Critical)</option>
-              <option value="high">🔥 높음 (High)</option>
-              <option value="medium">⚡ 보통 (Medium)</option>
-              <option value="low">🌱 낮음 (Low)</option>
+            <label for="editDna">KPI 유형 (BSC 관점)</label>
+            <select id="editDna" name="kpi_type">
+              <option value="성장">🌱 성장 (Growth)</option>
+              <option value="프로세스">⚙️ 프로세스 (Process)</option>
+              <option value="재무">💰 재무 (Financial)</option>
+              <option value="고객">🤝 고객 (Customer)</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="editDueDate">마감 기한</label>
-            <input type="date" id="editDueDate" name="due_date">
+            <label for="editPriority">상태</label>
+            <select id="editPriority" name="status">
+              <option value="지연">🚨 지연 (Delayed)</option>
+              <option value="보류">⏸️ 보류 (On Hold)</option>
+              <option value="진행중">⚡ 진행중 (In Progress)</option>
+              <option value="완료">✅ 완료 (Completed)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="editUnit">측정 단위</label>
+            <input type="text" id="editUnit" name="unit" placeholder="예: 명, %, 백만원" autocomplete="off">
+          </div>
+          <div class="form-group"></div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="editTarget">목표값</label>
+            <input type="number" id="editTarget" name="target_value" step="any" placeholder="0">
+          </div>
+
+          <div class="form-group">
+            <label for="editCurrent">현재값</label>
+            <input type="number" id="editCurrent" name="current_value" step="any" placeholder="0">
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="editStartDate">시작일</label>
+            <input type="date" id="editStartDate" name="start_date">
+          </div>
+
+          <div class="form-group">
+            <label for="editDueDate">종료일</label>
+            <input type="date" id="editDueDate" name="end_date">
           </div>
         </div>
 
         <div class="form-group">
           <label for="editMemo">상세 메모 & 세부 실행 방안</label>
           <textarea id="editMemo" name="memo" rows="3" placeholder="메모를 입력하세요"></textarea>
-        </div>
-
-        <div class="form-group checkbox-group">
-          <label class="toggle-checkbox-label">
-            <input type="checkbox" id="editCompleted" name="completed">
-            <span class="custom-toggle"></span>
-            <span class="toggle-text">이 업무를 완료 상태로 표시</span>
-          </label>
         </div>
 
         <div class="modal-actions">
